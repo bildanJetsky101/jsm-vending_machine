@@ -1,0 +1,20 @@
+
+.insertMoneyBtn:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}
+
+.processBtn:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}
+
+.takeOutBtn:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}
+
+.infoMoney:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}

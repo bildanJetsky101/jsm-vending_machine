@@ -1,0 +1,49 @@
+
+.container-charge {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background-color:wheat;
+    width:85%;
+    border-radius:20px;
+    padding:10px;
+    margin:auto;
+    background-color:rgba(255,255,255,0.40);
+}
+
+.charge-footer {
+    width:32%;
+    font-size:12px;
+}
+
+.money-charge {
+    padding:10px 0px 10px 0px;
+    margin:7px 7px 17px 7px;
+    width:150px;
+    height:90px;
+    display:flex;
+    flex-direction:row;
+    justify-content:space-evenly;
+    align-items:center;
+    border-radius:20px;
+    background-color:rgba(255,255,255,0.40);
+    box-shadow:0px 8px 18px 0px rgba(77,77,77,0.27);
+}
+
+.btn-take-charge{
+    width:80%;
+    height:50px;
+    tex-align:center;
+    padding-top:12px;
+    cursor:pointer;
+    background-color:rgba(34,34,34,0.10);
+    box-shadow:0px 8px 18px 0px rgba(77,77,77,0.27);
+    border-radius:20px;
+
+}
+
+.btn-take-charge:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}

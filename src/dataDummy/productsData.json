@@ -1,0 +1,39 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Dark Chocolate",
+      "stock": 10,
+      "price": 15000,
+      "img": "chocolate-img.png"
+    },
+    {
+      "id": 2,
+      "name": "Potato Chips",
+      "stock": 6,
+      "price": 8000,
+      "img": "chips-img.png"
+    },
+    {
+      "id": 3,
+      "name": "Delato Biscuit",
+      "stock": 1,
+      "price": 6000,
+      "img": "biscuit-img.png"
+    },
+    {
+      "id": 4,
+      "name": "Oreo Cookie",
+      "stock": 10,
+      "price": 10000,
+      "img": "oreo-img.png"
+    },
+    {
+      "id": 5,
+      "name": "Tango Waffer",
+      "stock": 3,
+      "price": 12000,
+      "img": "tango-img.png"
+    }
+  ]
+}
