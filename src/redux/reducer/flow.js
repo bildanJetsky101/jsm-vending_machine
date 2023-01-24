@@ -1,7 +1,7 @@
 const initialState ={
     money:0,
     products:[],
-    stockDecreast:false,
+    wallet: 0,
     charge:0,
 }
 
@@ -21,16 +21,23 @@ const flowReducer = (state = initialState, action) => {
             return{
                 money:0,
                 products:[],
-                stockDecreast:true,
+                wallet:0,
                 charge: state.charge += action.payload.charge
             }
-        case 'TAKE_CHARGE':
+        case 'TAKE_CHANGE':
             return{
                 money:0,
                 products:[],
-                stockDecreast:false,
-                charge: state.charge -= state.charge
+                wallet: state.charge,
+                charge: 0,
             }
+            case 'TO_WALLET':
+                return{
+                    money:0,
+                    products:[],
+                    wallet: 0,
+                    charge: 0,
+                }
         default:
             return state;
     }

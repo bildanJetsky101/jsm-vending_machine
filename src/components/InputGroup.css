@@ -2,6 +2,7 @@
 .insertMoneyBtn:active {
     transform:scale(0.94);
     color: rgba(2,2,2,0.80);
+    box-shadow:0px 0px 0px 0px rgba(77,77,77,0.01),
 }
 
 .processBtn:active {
@@ -17,4 +18,14 @@
 .infoMoney:active {
     transform:scale(0.94);
     color: rgba(2,2,2,0.80);
+}
+
+.btn-take-all-change:active {
+    transform:scale(0.94);
+    color: rgba(2,2,2,0.80);
+}
+
+.money-info {
+    color:white;
+    background-color:#D191A4;
 }

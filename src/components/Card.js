@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import AlertFailed from "./popUp/AlertFailed"
 
-export default function Card({item, product, setProduct}){
+export default function Card({item, product, setProduct, setShowAlertMoney, }){
     const[select, setSelect] = useState({
         counter:0,
         status:false,
@@ -22,13 +22,16 @@ export default function Card({item, product, setProduct}){
     }
     },[money])
 
+
     const onClickProduct = (item) => {
-        if(item.stock <= 0){
+        if(item.stock < 1){
             return setEmptyStock(true)
         }
+
         if(money < 1){
             return null
         }
+
         if(!select.status) {
             setProduct([...product, 
                 {
@@ -42,7 +45,7 @@ export default function Card({item, product, setProduct}){
                 setSelect({
                     counter:1,
                     status:true,
-                }) 
+                })
             }
             else return null
         } else {
@@ -56,7 +59,21 @@ export default function Card({item, product, setProduct}){
             }
             setProduct(setProductNew)
         }
+
     }
+
+    // detecting if money not enough to buy 
+    useEffect(()=>{
+        const totalArray = []
+        product?.forEach((e)=>{
+            totalArray.push(e.price)
+        })
+        let a = totalArray.length > 0? totalArray.reduce((a,b) => a + b) : 0
+        if(money < a){
+            setShowAlertMoney(true)
+        }
+      
+    },[product])
 
     const styles = {
         cardParent:{
@@ -66,7 +83,7 @@ export default function Card({item, product, setProduct}){
             display:'flex',
             flexDirection:'column',
             alignItems:'center',
-            cursor: !emptyStock? 'pointer' : '',
+            cursor:'pointer',
             boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
             backgroundColor: select.status? '#D191A4' : 'rgba(255,255,255,0.40)',
             marginRight:"11px",
@@ -80,7 +97,7 @@ export default function Card({item, product, setProduct}){
             boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
             backgroundColor: select.status? 'rgba(224,224,224,0.77)' : 'rgba(247,247,247,0.26)', 
             paddingTop:'18px',
-            width:'70%',
+            width:'75%',
             height:'65px',
             display:'flex',
             flexDirection:'column',
@@ -88,12 +105,12 @@ export default function Card({item, product, setProduct}){
             alignItems:'center',
             borderRadius:'20px', 
             lineHeight:'3px', 
-            marginTop:'6px', 
+            marginTop:'17px', 
         },
         imgProduct :{
-            marginTop:select.status? '65px' : '20px',
-            width:'130px',
-            height:'130px'
+            marginTop:select.status? '70px' : '32px',
+            width:'105px',
+            height:'105px'
         },
         stockInfo:{
             height:'35px',
@@ -102,7 +119,7 @@ export default function Card({item, product, setProduct}){
             marginLeft:'auto',
             backgroundColor: select.status? 'white' : 'rgba(57,57,57,0.10)',
             textAlign:'center',
-            borderRadius:'5px',
+            borderRadius:'6px',
             display:'flex',
             boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
             justifyContent:"space-around",
@@ -125,11 +142,11 @@ export default function Card({item, product, setProduct}){
 
     return (
         <div style={styles.cardParent}  onClick={() => onClickProduct(item)} >
-            <AlertFailed show={showAlert} handleClose={handleCloseAlert} text={`You need to insert the money first to select the product.`}/>
-              {emptyStock ?  <div style={styles.stockInfo}>
+            <AlertFailed show={showAlert} handleClose={handleCloseAlert} text={`You need to insert the money first to select the product.`}
+            />
+              {emptyStock || item.stock < 1?  <div style={styles.stockInfo}>
                   <p style={{fontSize:'13px'}}>Empty</p>
               </div> : infoStockFunction()
-              
               }
             <img style={styles.imgProduct} src={process.env.PUBLIC_URL+'assets/'+item.img} alt="" />
             <div style={styles.infoCard}>

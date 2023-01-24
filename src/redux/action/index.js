@@ -24,3 +24,9 @@ export function takeChange(){
         type: 'TAKE_CHANGE',
     }
 }
+
+export function toWallet(){
+    return{
+        type: 'TO_WALLET',
+    }
+}

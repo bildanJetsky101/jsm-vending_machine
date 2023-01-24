@@ -1,47 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal } from 'react-bootstrap'
 import './InsertMoney.css'
 import Money from './Money'
-import { useDispatch } from "react-redux";
-import { addMoney } from '../../redux/action';
+import { useSelector, useDispatch } from "react-redux";
+import { addMoney, toWallet } from '../../redux/action';
 import AlertFailed from './AlertFailed';
 
 export default function InputMoney({show, handleClose}){
     const [wallet, setWallet] = useState([2000, 5000, 10000, 15000, 20000, 25000, 50000, 100000])
     const [identify, setIdentify] = useState({index:0, money:''})
-    const [isTrue, setIsTrue] = useState(false)
     const [showAlert, setShowAlert] = useState(false)
     const dispatch = useDispatch()
+    const takeChange = useSelector(state => state.flow.wallet)
     const voucher = []
     const handleCloseAlert = () => setShowAlert(false)
+
+    // take change to the wallet
+    useEffect(()=>{
+        if(takeChange > 0){
+            wallet.push(takeChange)
+            dispatch(toWallet())
+        }
+    },[takeChange])
+
 
     const insertMoney = () => {
         // reference 
         const listMoney = ['2rb', '5rb', '10rb', '20rb', '50rb']
-        if(identify == null){
-            return setShowAlert(true)
-        }
-
+       
         if(!listMoney.includes(identify.money) || identify == null){
             return setShowAlert(true)
         }
          dispatch(addMoney(wallet[identify.index]))
          handleClose()
          handleCloseAlert()
+         setIdentify({index:0, money:''})
     }
 
     // turn integer into virtual money
     const moneyInputInfo = () => {
        wallet.map((item)=>{
-            voucher.push(`${item}`)
+            return voucher.push(`${item}`)
        })
        voucher.map((item, index, array) =>{
             if(item.length == 5) {
-                array[index] = `${item[0]}${item[1]}rb`
+               return array[index] = `${item[0]}${item[1]}rb`
             }else if(item.length == 4) {
-                array[index] = `${item[0]}rb`
+               return array[index] = `${item[0]}rb`
             }
-            else {array[index] = `${item[0]}${item[1]}${item[2]}rb`}
+            else { return array[index] = `${item[0]}${item[1]}${item[2]}rb`}
        })
     }
     moneyInputInfo()
@@ -57,7 +64,7 @@ export default function InputMoney({show, handleClose}){
                 <div className="money-section" >
                     {voucher.map((item, index) =>
                     <span key={index}>
-                        <Money index={index} item={item} identify={identify} setIdentify={setIdentify} isTrue={isTrue} setIsTrue={setIsTrue} />
+                        <Money index={index} item={item} identify={identify} setIdentify={setIdentify}  />
                     </span>
                     )}
                 </div>

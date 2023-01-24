@@ -2,26 +2,26 @@ import { useState } from 'react'
 import './InsertMoney.css'
 import './Money.css'
 
-export default function Money({item, index, identify, setIdentify, isTrue, setIsTrue}){
+export default function Money({item, index, identify, setIdentify}){
     const [name, setName] = useState(null)
 
     const handleMouseEnter = (e) => {
         setName(e._targetInst.memoizedProps.accessKey)
      };
     
+    const handleMouseLeave = () => {
+    }
     // handle virtual money select
     const changeOnClick = (index) => {
-        if(isTrue && name == identify.money){
-            setIsTrue(false)
-            setIdentify(null)
+        if(name === identify?.money && index === identify?.index){
+            setIdentify({index:0, money:''})
         } else {
             setIdentify({index:index, money:name})
-            setIsTrue(true)
         }
     }
 
-    const styles = () => {
-        if(name == identify?.money && isTrue) {
+    const styles = (index) => {
+        if(name === identify?.money && index === identify?.index) {
             return {
                 padding:'10px 0px 10px 0px',
                 marginRight:'7px',
@@ -34,8 +34,8 @@ export default function Money({item, index, identify, setIdentify, isTrue, setIs
                 alignItems:'center',
                 borderRadius:'20px',
                 cursor:'pointer',
-                transform:'scale(1.15)',
-                backgroundColor:'rgba(255,255,255,0.70)',
+                transform:'scale(1.10)',
+                backgroundColor:'rgba(255,255,255,0.75)',
                 boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
             }
         }
@@ -57,10 +57,10 @@ export default function Money({item, index, identify, setIdentify, isTrue, setIs
     }
 
         return (
-            <div onMouseEnter={(item) => handleMouseEnter(item)} 
-            style={styles()} accessKey={item}  onClick={() => changeOnClick(index)}>
-               <div >
-                    <span style={{marginRight:'auto'}}>Rp.</span>
+            <div onMouseEnter={(item) => handleMouseEnter(item)} className="money" 
+            style={styles(index)} accessKey={item}  onClick={() => changeOnClick(index)}>
+               <div style={{display:'flex', flexDirection:'column', alignItems:'flex-start',}}>
+                    <span style={{}}>Rp.</span>
                     <h5 >{item}</h5>
                </div>
                <div className="footer">

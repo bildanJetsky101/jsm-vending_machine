@@ -4,4 +4,10 @@
     fontWeight:500;
     line-height:6px;
     margin:auto;
+   
+}
+
+.front {
+    position:absolute;
+    z-index:1;
 }

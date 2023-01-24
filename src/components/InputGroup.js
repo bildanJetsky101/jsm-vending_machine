@@ -20,11 +20,13 @@ export default function InputGroup (){
     const [showOrder, setShowOrder] = useState(false)
     const [qtyProduct, setQtyProduct] = useState([])
     const [charge, setCharge] = useState(false)
-    const [formData, setFromData] = useState([])
+    const [formData, setFormData] = useState([])
     const dispatch = useDispatch()
     const transaction = useSelector(state => state.flow)
     const [dataProduct, setDataProduct] = useState([])
     const [isUpdate, setIsUpdate] = useState(false)
+    const [showNoProduct, setShowNoProduct] = useState(false)
+    const [inputMoneyInfo, setInputMoneyInfo] = useState(false)
     
     const handleClose = () => setShow(false)
     const handleCloseInsertMoney = () => setInsertMoneyShow(false)
@@ -32,6 +34,7 @@ export default function InputGroup (){
     const handleCloseAlert = () => setShowAlert(false)
     const handleCloseOrder = () => setShowOrder(false)
     const handleCloseTakeCharge = () => setCharge(false)
+    const handleCloseNoProduct = () => setShowNoProduct(false)
 
     const api = 'http://localhost:3000/products'
 
@@ -39,6 +42,8 @@ export default function InputGroup (){
     useEffect(()=>{
         axios.get(api).then((res) => {
             setDataProduct(res?.data ?? [])
+        }).catch((err) =>{
+            console.error('Something wrong... \n'+err)
         })
     },[isUpdate])
    
@@ -48,11 +53,14 @@ export default function InputGroup (){
         }
     },[transaction])
 
+
     const moneyInputInfo = () => {
-        let info = transaction.money.toString()
-        if(info.length == 4){ return ( <p style={{fontWeight:"700"}}>{info[0]}rb</p> ) } 
-        else if (info.length == 5){ return (<p style={{fontWeight:"700"}}> {info[0]}{info[1]}rb </p> ) }
-        return (<img style={{width:'25px', height:'25px'}} src={process.env.PUBLIC_URL+'assets/deposit.png'} alt="" />
+     
+        let info = transaction?.money.toString()
+
+        if(info.length == 4){ return ( <p style={{fontWeight:"700"}}><span style={{fontSize:'11px', marginRight:'10px'}}>Rp.</span>{info[0]}rb</p> ) } 
+        else if (info.length == 5){ return (<p style={{fontWeight:"700"}}><span style={{fontSize:'11px',marginRight:'7px'}}>Rp.</span> {info[0]}{info[1]}rb </p> ) }
+        return (<p style={{fontWeight:"700"}}><span style={{fontSize:'11px',marginRight:'13px'}}>Rp.</span> 0</p>
         )
     }
 
@@ -84,25 +92,27 @@ export default function InputGroup (){
     }
 
     const sayGreeting = () => {
-            if (dates.hours >= 19 && dates.hours <= 4){
+            if (dates.hours >= 19 || dates.hours < 3 ){
                 setGreeting({
                     greeting:'Good Night',
-                    icon:'assets/night.png'
+                    icon:'assets/night-solid.png'
                 })
-            } else if (dates.hours >= 6 && dates.hours < 14) {
+            } else if (dates.hours >= 6 && dates.hours <= 12) {
                 setGreeting({
                     greeting:'Good Morning',
                     icon:'assets/morning.png'
                 })
-            } else if (dates.hours >= 15 && dates.hours< 18) {
+            } else if (dates.hours >= 13 && dates.hours < 19) {
                 setGreeting({
                     greeting:'Good Afternoon',
                     icon:'assets/afternoon.png'
                 })
-            } else setGreeting({
-                greeting:'Good Night',
-                icon:'assets/night.png'
-            })
+            } else {
+                setGreeting({
+                    greeting:'Good Morning',
+                    icon:'assets/night-solid.png'
+                })
+            }
     }
 
     useEffect(() => {
@@ -114,7 +124,7 @@ export default function InputGroup (){
         let result = 0
         dataProduct?.map(item => result += item.stock )
         setProduct(result)
-    })
+    },[dataProduct])
 
     const InsertMoney = () => {
         if(transaction.money < 1){
@@ -131,8 +141,14 @@ export default function InputGroup (){
     // process the order
     const makeTheProcess = () => {
         if(transaction.money < 1){
+            
+            return setShowNoProduct(true)
+        }
+
+        if(transaction.products.length < 1){
             return setShow(true)
         }
+
         const productData = transaction.products
         const totalArray = []
 
@@ -142,16 +158,17 @@ export default function InputGroup (){
         })
 
         const change = transaction.money - totalArray.reduce((a,b) => a + b)
-        if(change < 1){
+        if(change < 0){
+            setFormData([])
             return setShowAlert(true)
         }
-        
-        setCharge(change)
-        productData.forEach((e)=>{
-            qtyProduct.push(e)
-        })
-        dispatch(buyProducts(change))
-        setIsUpdate(true)
+        setTimeout(function(){
+            setCharge(change)
+            dispatch(buyProducts(change))
+            setIsUpdate(true)
+            handleCloseNoProduct()
+        },900)
+
         updateStock()
         
     }
@@ -173,6 +190,7 @@ export default function InputGroup (){
             for(let i = 0; i < newFormData.length; i++){
                 for(let j in dataProduct){
                     if(newFormData[i].id === dataProduct[j].id){
+                        setTimeout(function(){
                         formDataUpdate = {
                                 id:dataProduct[j].id,
                                 name:newFormData[i].name,
@@ -180,31 +198,63 @@ export default function InputGroup (){
                                 price:newFormData[i].price,
                                 img:newFormData[i].img   
                             }
-                            axios.put(api+'/'+dataProduct[j].id, formDataUpdate)
-                               
+                                qtyProduct.push(formDataUpdate)
+                                axios.put(api+'/'+dataProduct[j].id, formDataUpdate).catch(err => {
+                                    console.error('something wrong in update.... \n'+err)
+                                  })
+                        },150 * j)
                     }       
                 }
             }
             setIsUpdate(false)
-            setFromData([])
+            setFormData([])
     }
 
 
-    // take the charge out and reset everything back
+    // show change pop up
     const takeOutChange = () => {
-        //setChange(false)
         setShowTakeCharge(true)
-       // dispatch(takeCharge())
-       
+    }
+
+    const moneyInfoBlink = () => {
+        if(showNoProduct){
+            return 'money-info'
+        }
+    }
+
+    const greetingIcon = () => {
+        if(greeting.greeting === 'Good Night') {
+           return {
+                boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)', 
+                width:'55px', 
+                padding:'7px', 
+                height:'fit-content', 
+                borderRadius:'15px', 
+                backgroundColor:'rgba(0,0,0,0.77)',
+                display:'flex', 
+                justifyContent:'center',
+            }
+        }
+        return {
+            boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)', 
+            width:'55px', 
+            padding:'7px', 
+            height:'fit-content', 
+            borderRadius:'15px', 
+            backgroundColor:'rgba(255,255,255,0.87)',
+            display:'flex', 
+            justifyContent:'center',
+        }
     }
 
     const changeSections = () => {
         if(charge){
             return (
-                <div style={styles.changesSectionOn} onClick={takeOutChange}>
+                <div style={styles.changesSectionOn} className="btn-take-all-change" onClick={takeOutChange}>
                     <div style={styles.changeNotif}></div> 
                     <div style={styles.changesBoxOn}>
-                        <img style={{width:'40px', height:'40px'}} src={process.env.PUBLIC_URL+'assets/money.png'} alt="" />
+                        <p>Take Change</p>
+                        <img style={{width:'12px', height:'12px', margin:'-10px 0px 0px 90% '}} src={process.env.PUBLIC_URL+'assets/change-arrow.png'} alt="" />
                     </div>
                 </div>
             )
@@ -212,7 +262,8 @@ export default function InputGroup (){
         return (
             <div style={styles.changesSection}>
                 <div style={styles.changesBox}>
-                    <img style={{width:'40px', height:'40px'}} src={process.env.PUBLIC_URL+'assets/money.png'} alt="" />
+                    <p>Take Change</p>
+                    <img style={{width:'12px', height:'12px', margin:'-10px 0px 0px 90% '}} src={process.env.PUBLIC_URL+'assets/change-arrow.png'} alt="" />
                 </div>
             </div>
         )
@@ -221,10 +272,11 @@ export default function InputGroup (){
     
     return (
         <div style={styles.inputGroupParent}>
-            <FailedAlert show={show} handleClose={handleClose}/>
             <InsertMoneyModal show={showInsertMoney} handleClose={handleCloseInsertMoney} />
             <TakeChange show={showTakeCharge} handleClose={handleCloseCharge} handleCloseTakeChange={handleCloseTakeCharge}/>
-            <AlertFailed show={showAlert} handleClose={handleCloseAlert} text={`There wasn't enough money`}/>
+            <AlertFailed show={showAlert} handleClose={handleCloseAlert} text={`There wasn't enough money to buy`} place={'far'}/>
+            <AlertFailed show={show} handleClose={handleClose} text={`No product detected, please select the product`} place={'close'}/>
+            <AlertFailed show={showNoProduct} handleClose={handleCloseNoProduct} text={`Make sure you insert the money first before buying`}  place={'close'}/>
             <TakeOrder show={showOrder} handleClose={handleCloseOrder} product={qtyProduct} setQtyProduct={setQtyProduct}/>
             <div style={styles.header}>
                 <div style={styles.products}>
@@ -237,13 +289,13 @@ export default function InputGroup (){
                 <div style={styles.greeting}>
                     <p><span style={{color:'#D191A4'}}>Hi</span>, {greeting.greeting}</p>
                     <div style={styles.greetingAdditional}>
-                        <div style={styles.greetingIcon}>
+                        <div style={greetingIcon()}>
                             <img style={{width:'30px', height:'30px', }} src={process.env.PUBLIC_URL+`${greeting.icon}` } alt="" />
                         </div>
                         <p style={styles.greetingInfo}>{dates.daysNames[dates.day]}, {dates.monthsNames[dates.month-1]} {dates.getNewDate()} {dates.year}</p>
                     </div>
                 </div>
-                <div style={styles.moneyInfo} className="infoMoney">
+                <div style={styles.moneyInfo} className={moneyInfoBlink()}>
                     {moneyInputInfo()}
                 </div>
             </div>
@@ -263,10 +315,10 @@ export default function InputGroup (){
             </div>
            
             <div style={styles.doorContainer} onClick={takeOut} className="takeOutBtn">
-                {qtyProduct.length > 0? 
+                {qtyProduct?.length > 0? 
                  <div style={styles.door}>
-                     {qtyProduct.length > 0? <div style={styles.doorNotif}>{qtyProduct.length}</div> : null}
-                     {qtyProduct.length < 5? qtyProduct.map((item, index) =>
+                     {qtyProduct?.length > 0? <div style={styles.doorNotif}>{qtyProduct?.length}</div> : null}
+                     {qtyProduct?.length < 5? qtyProduct?.map((item, index) =>
                         <span key={index}>
                             <img style={{width:'24px', height:'24px', marginTop:'0px' }} src={process.env.PUBLIC_URL+'assets/products.png'} alt="" />
                         </span>
@@ -276,7 +328,7 @@ export default function InputGroup (){
                 :
                 <div style={{display:'flex', flexDirection:'row', alignItems:'center'}}>
                     <div style={styles.emptyContainer}>
-                        <img style={{width:'75px', height:'75px', marginLeft:'5px'}} src={process.env.PUBLIC_URL+'assets/empty-box.png'} alt="" />
+                        <img style={{width:'55px', height:'55px', marginLeft:'5px'}} src={process.env.PUBLIC_URL+'assets/empty-box.png'} alt="" />
                     </div>
                 </div>
                 }
@@ -289,7 +341,7 @@ export default function InputGroup (){
 
 const styles = {
     inputGroupParent: {
-        width:"31%",
+        width:"47vh",
         height:'88vh',
         borderRadius:'20px',
         marginBottom:'40px',
@@ -314,7 +366,7 @@ const styles = {
     infoIcon: {
         display:'flex',
         flexDirection:'row',
-        width:'73%',
+        maxWidth:'34vh',
         flexWrap:'wrap',
         margin:'auto',
         justifyContent:'space-between',
@@ -324,9 +376,8 @@ const styles = {
         display:'flex',
         flexDirection:'row',
         cursor:'pointer',
-        backgroundColor:'#D191A4',
+        backgroundColor:'#EED2CD',
         padding:'5px 28px 5px 28px',
-        color:'rgba(247,247,247)',
         fontSize:'16px',
         fontWeight:'500',
         marginTop:'10px',
@@ -341,30 +392,34 @@ const styles = {
         padding:'20px',
         height:'fit-content',
         display:'flex',
-        color:'white',
         fontWeight:'500',
         width:'110px',
         flexDirection:'column',
         justifyContent:'center',
         borderRadius:'20px',
-        backgroundColor:'#C0BBED'
+        backgroundColor:'#EED2CD',
     },
     changesBox: {
         display:'flex',
-        padding:'25px',
+        padding:'20px',
+        fontWeight:'500',
+        flexDirection:'column',
         height:'fit-content',
         justifyContent:'center',
         alignItems:'center',
-        width:'100px',
+        width:'108px',
         borderRadius:'20px',
+        backgroundColor:'rgba(255,255,255,0.57)',
         boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
     },
     changesBoxOn: {
         display:'flex',
-        padding:'25px',
+        padding:'20px',
+        fontWeight:'500',
         height:'fit-content',
-        width:'100px',
+        width:'108px',
         borderRadius:'20px',
+        flexDirection:'column',
         justifyContent:'center',
         alignItems:'center',
         boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)',
@@ -391,7 +446,7 @@ const styles = {
     },
     greeting:{
         marginLeft:'17%',
-        fontSize:'23px',
+        fontSize:'27px',
         width:'53%',
         display:'flex',
         flexDirection:'column',
@@ -401,22 +456,13 @@ const styles = {
         marginTop:'-10px'
     },
     greetingInfo: {
-        marginLeft:'5px', 
+        marginLeft:'8px', 
         marginTop:'20px', 
         lineHeight:'18px', 
         fontSize:'13px',
         width:'30vh',
     },
-    greetingIcon:{
-        boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)', 
-        width:'55px', 
-        padding:'7px', 
-        height:'fit-content', 
-        borderRadius:'15px', 
-        backgroundColor:'white', 
-        display:'flex', 
-        justifyContent:'center',
-    },
+  
     greetingAdditional: {
         display:'flex',
         alignItems:'center',  
@@ -424,10 +470,10 @@ const styles = {
     },
     moneyInfo: {
         borderRadius:'15px',
-        width:'27%',
+        width:'31%',
         height:'54px',
         display:'flex',
-        justifyContent:'Center',
+        justifyContent:'space-evenly',
         paddingTop:'15px',
         marginLeft:'auto',
         cursor:'pointer',
@@ -456,7 +502,7 @@ const styles = {
         height:"130px",
         margin:'-15px auto auto auto',
         display:'flex',
-        backgroundColor:'rgb(245,245,245,0.34)',
+        backgroundColor:'rgba(255,255,255,0.47)',
         justifyContent:'center',
         alignItems:'center',
         padding:'5px',
@@ -469,8 +515,6 @@ const styles = {
         borderRadius:'20px', 
         height:'80%',
         padding:'10px 30px 10px 30px',
-        backgroundColor:'rgba(57,57,57,0.10)',  
-        boxShadow:'0px 8px 18px 0px rgba(77,77,77,0.27)', 
         marginLeft:'10%',
         display:'flex',
         justifyContent:'center',
@@ -507,8 +551,8 @@ const styles = {
         width:'18px',
         height:'18px',
         borderRadius:'50%',
-        marginLeft:'11vh',
-        marginTop:'-14vh',
+        marginLeft:'12vh',
+        marginTop:'-15vh',
         backgroundColor:'tomato',
         position:'absolute'
     }

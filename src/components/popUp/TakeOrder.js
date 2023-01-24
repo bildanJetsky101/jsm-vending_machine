@@ -11,11 +11,11 @@ export default function TakeOrder({show, handleClose, product, setQtyProduct}) {
     }
 
     return(
-            <Modal style={{marginTop:'2rem', }} size='lg' show={show} onHide={handleClose} >
+            <Modal style={{marginTop:'1rem',  }} size='lg' show={show} onHide={handleClose} >
                 <div style={styles.containerOrder}>
                     <div style={styles.contentOrder}>
                         <div className={product.length > 0? "img-parent" : "img-parent-empty"}>
-                            <img className={product.length > 0? "img": "img-empty"} src={process.env.PUBLIC_URL+'assets/stock.png'} alt="" />
+                            <img className={product.length > 0? "img": "img-empty"} src={process.env.PUBLIC_URL+'assets/empty-box2.png'} alt="" />
                         </div>
                         <div className='order-product-section'>
                             {product?.map((item, index) =>
@@ -55,7 +55,7 @@ const styles = {
         display:'flex',
         paddingTop:'30px',
         flexDirection:'column',
-        paddingBottom:'70px',
+        paddingBottom:'30px',
         justifyContent:'center',
         borderRadius:'20px',
         alignItems:'center',
